@@ -1,0 +1,19 @@
+2025-05-18 11:07:33 [main] INFO  DirectoryUtility:19 - Created folder: C:\Users\Rohit\IdeaProjects\AutomationFramework_2.0\reports
+2025-05-18 11:07:33 [main] INFO  DirectoryUtility:24 - Folder already exists: C:\Users\Rohit\IdeaProjects\AutomationFramework_2.0\logs
+2025-05-18 11:07:33 [main] INFO  DirectoryUtility:19 - Created folder: C:\Users\Rohit\IdeaProjects\AutomationFramework_2.0\screenshots
+2025-05-18 11:07:33 [main] INFO  DirectoryUtility:19 - Created folder: C:\Users\Rohit\IdeaProjects\AutomationFramework_2.0\screenshots\passed
+2025-05-18 11:07:33 [main] INFO  DirectoryUtility:19 - Created folder: C:\Users\Rohit\IdeaProjects\AutomationFramework_2.0\screenshots\failed
+2025-05-18 11:07:34 [main] INFO  DirectoryUtility:19 - Created folder: C:\Users\Rohit\IdeaProjects\AutomationFramework_2.0\test data\exported file
+2025-05-18 11:07:34 [main] INFO  DirectoryUtility:19 - Created folder: C:\Users\Rohit\IdeaProjects\AutomationFramework_2.0\test data\processed file
+2025-05-18 11:07:34 [main] INFO  LoginPageTest:51 - Required folders verified or created.
+2025-05-18 11:07:34 [main] INFO  LogListener:41 - Test Suite Started: AutomationFramework_2.0
+2025-05-18 11:07:45 [main] INFO  LoginPageTest:26 - Browser launched and navigated to: https://www.google.com/
+2025-05-18 11:07:45 [main] INFO  LogListener:18 - Test Started: TC001
+2025-05-18 11:07:45 [main] INFO  LoginPageTest:30 - LoginPage initialized
+2025-05-18 11:07:45 [main] INFO  LoginPage:19 - Entering search text: Testing Baba
+2025-05-18 11:07:45 [main] INFO  LoginPage:24 - Search submitted
+2025-05-18 11:07:45 [main] INFO  LoginPageTest:34 - Search performed for keyword: 'Testing Baba'
+2025-05-18 11:07:45 [main] INFO  LogListener:23 - Test Passed: TC001
+2025-05-18 11:07:45 [main] INFO  LoginPageTest:32 - Quitting browser...
+2025-05-18 11:07:46 [main] INFO  LoginPageTest:39 - Driver unloaded from thread-local storage.
+2025-05-18 11:07:46 [main] INFO  LogListener:46 - Test Suite Finished: AutomationFramework_2.0
