@@ -5,6 +5,7 @@ import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.MediaEntityBuilder;
 import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+import org.openqa.selenium.WebElement;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -53,6 +54,17 @@ public class ExtentReportListener implements ITestListener {
             getExtentTest().pass(stepName);
             e.printStackTrace();
             getExtentTest().log(Status.WARNING, "Could not capture screenshot: " + e.getMessage());
+        }
+    }
+
+    public static void logPassWithElementScreenshot(String stepName, WebElement element) {
+        try {
+            String screenshotPath = ScreenshotUtility.takeElementScreenshot(element, "passed", stepName);
+            getExtentTest().pass(stepName, MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+        } catch (Exception e) {
+            getExtentTest().pass(stepName);
+            e.printStackTrace();
+            getExtentTest().log(Status.WARNING, "Could not capture element screenshot: " + e.getMessage());
         }
     }
 

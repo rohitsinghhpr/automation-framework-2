@@ -15,10 +15,19 @@ public class LoginPage extends BasePage {
     }
     @FindBy(xpath="//textarea[@aria-label=\"Search\"]")
     WebElement searchInput;
+
+    @FindBy(xpath = "//main")
+    WebElement codeBlock;
+
     public void search(String text) {
         logger.info("Entering search text: " + text);
         searchInput.sendKeys(text);
     }
+
+    public WebElement getCodeBlock(){
+        return codeBlock;
+    }
+
     public void enter(){
         searchInput.sendKeys(Keys.ENTER);
         logger.info("Search submitted");

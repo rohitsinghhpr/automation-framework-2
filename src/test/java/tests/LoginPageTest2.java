@@ -9,7 +9,7 @@ import pages.LoginPage;
 import utils.ExtentReportListener;
 import utils.driver.DriverManager;
 
-public class LoginPageTest extends BaseTest {
+public class LoginPageTest2 extends BaseTest {
 
     @BeforeMethod
     public void setUpBrowser(){
@@ -27,6 +27,9 @@ public class LoginPageTest extends BaseTest {
             LoginPage loginPage = new LoginPage(DriverManager.getDriver());
             ExtentReportListener.getExtentTest().log(Status.PASS,"navigated to login page");
             ExtentReportListener.logPassWithElementScreenshot("navigated to login page",loginPage.getCodeBlock());
+
+            System.out.println("LoginPageTest2");
+
         } catch (Exception e) {
             logger.error("Test TC001 failed due to exception: ", e);
             throw new RuntimeException(e);

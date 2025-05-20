@@ -15,8 +15,8 @@ public class BaseTest {
 
     public void setUpBrowser() {
         String browserValue = TestConstants.BROWSER;
-        String browser = (browserValue != null && !browserValue.trim().isEmpty()) ? browserValue.trim() : "chrome";
         String headlessValue = TestConstants.HEADLESS;
+        String browser = (browserValue != null && !browserValue.trim().isEmpty()) ? browserValue.trim() : "chrome";
         boolean headless = Boolean.parseBoolean(headlessValue != null ? headlessValue.trim() : "false");
         String url = TestConstants.BASE_URL;
         WebDriver driver = DriverFactory.createInstance(browser, headless);
