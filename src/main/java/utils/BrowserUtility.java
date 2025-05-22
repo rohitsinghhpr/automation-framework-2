@@ -190,14 +190,24 @@ public final class BrowserUtility implements IBrowserUtility {
     }
 
     public static void click(WebDriver driver, WebElement element, String elementName) {
-        try {
-            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
-            BrowserUtility.scrollToElement(driver, element, elementName);
-            element.click();
-            logger.info("Clicked on element: {}", elementName);
-        } catch (Exception e) {
-            logger.error("Failed to click on element: {}. Exception: {}", elementName, e.getMessage());
-            throw new RuntimeException("Failed to click on element: " + elementName, e);
+        int attempts = 0;
+        while (attempts < 2) {
+            try {
+                WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
+                BrowserUtility.scrollToElement(driver, element, elementName);
+                element.click();
+                logger.info("Clicked on element: {}", elementName);
+                return;
+            } catch (StaleElementReferenceException e) {
+                attempts++;
+                if (attempts == 2) {
+                    logger.error("StaleElementReferenceException for element: {}. Exception: {}", elementName, e.getMessage());
+                    throw new RuntimeException("Stale element reference after retry: " + elementName, e);
+                }
+            } catch (Exception e) {
+                logger.error("Failed to click on element: {}. Exception: {}", elementName, e.getMessage());
+                throw new RuntimeException("Failed to click on element: " + elementName, e);
+            }
         }
     }
 
