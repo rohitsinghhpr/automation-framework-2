@@ -28,7 +28,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void scrollToElement(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             logger.info("Scrolling to element: " + elementName);
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
             logger.info("Scrolled to element: " + elementName);
@@ -41,7 +41,7 @@ public final class BrowserUtility implements IBrowserUtility {
     public static void scrollToElement(WebDriver driver, By locator, String elementName) {
         try {
             WebElement element = driver.findElement(locator);
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             logger.info("Scrolling to element: {}", elementName);
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
             logger.info("Scrolled to element: {}", elementName);
@@ -108,7 +108,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void focusElementUsingJS(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             logger.info("Focusing on element: " + elementName);
             ((JavascriptExecutor) driver).executeScript("arguments[0].focus();", element);
             logger.info("Focused on element: " + elementName);
@@ -120,7 +120,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void blurElementUsingJS(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             logger.info("Blurring element: " + elementName);
             ((JavascriptExecutor) driver).executeScript("arguments[0].blur();", element);
             logger.info("Blurred element: " + elementName);
@@ -155,7 +155,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void clearInputUsingJS(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             logger.info("Clearing input value for element: " + elementName);
             ((JavascriptExecutor) driver).executeScript("arguments[0].value='';", element);
             logger.info("Cleared input value for element: " + elementName);
@@ -191,7 +191,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void click(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             element.click();
             logger.info("Clicked on element: {}", elementName);
@@ -203,8 +203,8 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void click(WebDriver driver, By locator, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, locator, 20, elementName);
-            WaitUtility.waitForClickability(driver, locator, 20, elementName);
+            WaitUtility.waitForVisibility(driver, locator, TestConstants.TIMEOUT, elementName);
+            WaitUtility.waitForClickability(driver, locator, TestConstants.TIMEOUT, elementName);
             WebElement element = driver.findElement(locator);
             BrowserUtility.scrollToElement(driver, locator, elementName);
             element.click();
@@ -218,8 +218,8 @@ public final class BrowserUtility implements IBrowserUtility {
     public static void doubleClick(WebDriver driver, WebElement element, String elementName) {
         try {
             Actions actions = new Actions(driver);
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
-            WaitUtility.waitForClickability(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
+            WaitUtility.waitForClickability(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             actions.doubleClick(element).perform();
             logger.info("Double clicked on element: {}", elementName);
@@ -232,8 +232,8 @@ public final class BrowserUtility implements IBrowserUtility {
     public static void rightClick(WebDriver driver, WebElement element, String elementName) {
         try {
             Actions actions = new Actions(driver);
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
-            WaitUtility.waitForClickability(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
+            WaitUtility.waitForClickability(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             actions.contextClick(element).perform();
             logger.info("Right clicked on element: {}", elementName);
@@ -245,7 +245,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void sendKeys(WebDriver driver, WebElement element, String value, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             element.sendKeys(value);
             logger.info("Sent keys '{}' to element: {}", value, elementName);
@@ -257,7 +257,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void sendKeys(WebDriver driver, By locator, String value, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, locator, 20, elementName);
+            WaitUtility.waitForVisibility(driver, locator, TestConstants.TIMEOUT, elementName);
             WebElement element = driver.findElement(locator);
             BrowserUtility.scrollToElement(driver, locator, elementName);
             element.sendKeys(value);
@@ -270,7 +270,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static String getText(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             String text = element.getText();
             logger.info("Got text '{}' from element: {}", text, elementName);
@@ -283,7 +283,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void clear(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             element.clear();
             logger.info("Cleared element: {}", elementName);
@@ -295,7 +295,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static boolean isDisplayed(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             boolean displayed = element.isDisplayed();
             logger.info("Element '{}' displayed: {}", elementName, displayed);
@@ -308,7 +308,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static boolean isEnabled(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             boolean enabled = element.isEnabled();
             logger.info("Element '{}' enabled: {}", elementName, enabled);
@@ -321,7 +321,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static boolean isDisabled(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             boolean disabled = !element.isEnabled();
             logger.info("Element '{}' disabled: {}", elementName, disabled);
@@ -335,7 +335,7 @@ public final class BrowserUtility implements IBrowserUtility {
     public static void checkIfNotSelected(WebDriver driver, WebElement element, String elementName) {
         try {
             if (!element.isSelected()) {
-                WaitUtility.waitForVisibility(driver, element, 20, elementName);
+                WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
                 BrowserUtility.scrollToElement(driver, element, elementName);
                 click(driver, element, elementName);
                 logger.info("Checked the element (if not already selected): {}", elementName);
@@ -351,7 +351,7 @@ public final class BrowserUtility implements IBrowserUtility {
     public static void uncheckIfSelected(WebDriver driver, WebElement element, String elementName) {
         try {
             if (element.isSelected()) {
-                WaitUtility.waitForVisibility(driver, element, 20, elementName);
+                WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
                 BrowserUtility.scrollToElement(driver, element, elementName);
                 click(driver, element, elementName);
                 logger.info("Unchecked the element (if it was selected): {}", elementName);
@@ -366,7 +366,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static boolean isChecked(WebDriver driver, WebElement element, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, element, 20, elementName);
+            WaitUtility.waitForVisibility(driver, element, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, element, elementName);
             boolean selected = element.isSelected();
             logger.info("Element '{}' selected state is '{}'", elementName, selected);
@@ -380,7 +380,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void selectByVisibleText(WebDriver driver, WebElement dropdownElement, String visibleText, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             select.selectByVisibleText(visibleText);
@@ -396,7 +396,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void selectByValue(WebDriver driver, WebElement dropdownElement, String value, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             select.selectByValue(value);
@@ -412,7 +412,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void selectByIndex(WebDriver driver, WebElement dropdownElement, int index, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             select.selectByIndex(index);
@@ -428,7 +428,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void selectRandomOption(WebDriver driver, WebElement dropdownElement, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             List<WebElement> options = select.getOptions();
@@ -453,7 +453,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static boolean isOptionSelected(WebDriver driver, WebElement dropdownElement, String expectedOption, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             List<WebElement> selectedOptions = select.getAllSelectedOptions();
@@ -473,7 +473,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static String getSelectedOptionText(WebDriver driver, WebElement dropdownElement, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             String selectedText = select.getFirstSelectedOption().getText();
@@ -488,7 +488,7 @@ public final class BrowserUtility implements IBrowserUtility {
     public static List<String> getAllDropdownOptions(WebDriver driver, WebElement dropdownElement, String elementName) {
         List<String> optionsText = new ArrayList<>();
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             List<WebElement> options = select.getOptions();
@@ -505,7 +505,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static boolean isOptionPresent(WebDriver driver, WebElement dropdownElement, String expectedOption, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             List<WebElement> options = select.getOptions();
@@ -525,7 +525,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static int getDropdownSize(WebDriver driver, WebElement dropdownElement, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             int size = select.getOptions().size();
@@ -539,7 +539,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static boolean isMultiple(WebDriver driver, WebElement dropdownElement, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             boolean multiple = select.isMultiple();
@@ -553,7 +553,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void deselectByVisibleText(WebDriver driver, WebElement dropdownElement, String visibleText, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             if (select.isMultiple()) {
@@ -574,7 +574,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void deselectByValue(WebDriver driver, WebElement dropdownElement, String value, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             if (select.isMultiple()) {
@@ -595,7 +595,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void deselectByIndex(WebDriver driver, WebElement dropdownElement, int index, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             if (select.isMultiple()) {
@@ -616,7 +616,7 @@ public final class BrowserUtility implements IBrowserUtility {
 
     public static void deselectAll(WebDriver driver, WebElement dropdownElement, String elementName) {
         try {
-            WaitUtility.waitForVisibility(driver, dropdownElement, 20, elementName);
+            WaitUtility.waitForVisibility(driver, dropdownElement, TestConstants.TIMEOUT, elementName);
             BrowserUtility.scrollToElement(driver, dropdownElement, elementName);
             Select select = new Select(dropdownElement);
             if (select.isMultiple()) {

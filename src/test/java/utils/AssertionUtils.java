@@ -2,6 +2,10 @@ package utils;
 
 //public class AssertionUtils {
 //
+//    public static void assertPageTitleEquals(String actual, String expected) {
+//        Assert.assertEquals(actual, expected, "❌ Page title mismatch!");
+//        System.out.println("✅ Title matched: " + expected);
+//    }
 //    public static void assertTitleEquals(String actual, String expected) {
 //        Assert.assertEquals(actual, expected, "❌ Page title mismatch!");
 //        System.out.println("✅ Title matched: " + expected);

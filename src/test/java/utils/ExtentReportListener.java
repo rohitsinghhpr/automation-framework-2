@@ -19,7 +19,6 @@ import java.util.Date;
 public class ExtentReportListener implements ITestListener {
 
     public void configureReport() {
-        String configFileName = System.getProperty("user.dir")+"/config/config.properties";
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
         String reportFileName = "TestReport_" + timeStamp + ".html";
         String reportsDirPath = System.getProperty("user.dir") + "/reports";
@@ -30,12 +29,12 @@ public class ExtentReportListener implements ITestListener {
         }
 
         ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportsDirPath + "/" + reportFileName);
-        sparkReporter.config().setDocumentTitle(PropertyReader.getProperty(configFileName,"REPORT_TITLE"));
-        sparkReporter.config().setReportName(PropertyReader.getProperty(configFileName,"REPORT_NAME"));
+        sparkReporter.config().setDocumentTitle(TestConstants.REPORT_TITLE);
+        sparkReporter.config().setReportName(TestConstants.REPORT_NAME);
 
-        if ("DARK".equalsIgnoreCase(PropertyReader.getProperty(configFileName,"REPORT_THEME"))) {
+        if ("DARK".equalsIgnoreCase(TestConstants.REPORT_THEME)) {
             sparkReporter.config().setTheme(Theme.DARK);
-        } else if ("STANDARD".equalsIgnoreCase(PropertyReader.getProperty(configFileName,"REPORT_THEME"))) {
+        } else if ("STANDARD".equalsIgnoreCase(TestConstants.REPORT_THEME)) {
             sparkReporter.config().setTheme(Theme.STANDARD);
         } else {
             // Default theme if nothing is configured
@@ -45,9 +44,9 @@ public class ExtentReportListener implements ITestListener {
 
         extent = new ExtentReports();
         extent.attachReporter(sparkReporter);
-        extent.setSystemInfo("Host Name", PropertyReader.getProperty(configFileName,"HOST_NAME"));
-        extent.setSystemInfo("Environment", PropertyReader.getProperty(configFileName,"ENVIRONMENT"));
-        extent.setSystemInfo("User", PropertyReader.getProperty(configFileName,"USER"));
+        extent.setSystemInfo("Host Name",TestConstants.HOST_NAME);
+        extent.setSystemInfo("Environment", TestConstants.ENVIRONMENT);
+        extent.setSystemInfo("User", TestConstants.USER);
     }
 
     private static ExtentReports extent;
@@ -59,7 +58,7 @@ public class ExtentReportListener implements ITestListener {
 
     public static void logPassWithScreenshot(String stepName) {
         try {
-            String screenshotFormat = PropertyReader.getProperty(System.getProperty("user.dir")+"/config/config.properties","SCREENSHOT_FORMAT");
+            String screenshotFormat = TestConstants.SCREENSHOT_FORMAT;
             if ("base64".equalsIgnoreCase(screenshotFormat)) {
                 String base64Screenshot = ScreenshotUtility.takeScreenshotAsBase64(DriverManager.getDriver());
                 getExtentTest().pass(stepName, MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
@@ -79,7 +78,7 @@ public class ExtentReportListener implements ITestListener {
 
     public static void logPassWithElementScreenshot(String stepName, WebElement element) {
         try {
-            String screenshotFormat = PropertyReader.getProperty(System.getProperty("user.dir")+"/config/config.properties","SCREENSHOT_FORMAT");
+            String screenshotFormat = TestConstants.SCREENSHOT_FORMAT;
             if ("base64".equalsIgnoreCase(screenshotFormat)) {
                 String base64Screenshot = ScreenshotUtility.takeElementScreenshotAsBase64(element);
                 getExtentTest().pass(stepName, MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
@@ -120,7 +119,7 @@ public class ExtentReportListener implements ITestListener {
         test.get().log(Status.FAIL, result.getThrowable());
         if (DriverManager.getDriver() != null) {
             try {
-                String screenshotFormat = PropertyReader.getProperty(System.getProperty("user.dir")+"/config/config.properties","SCREENSHOT_FORMAT");
+                String screenshotFormat = TestConstants.SCREENSHOT_FORMAT;
                 if ("base64".equalsIgnoreCase(screenshotFormat)) {
                     String base64Screenshot = ScreenshotUtility.takeScreenshotAsBase64(DriverManager.getDriver());
                     test.get().addScreenCaptureFromBase64String(base64Screenshot, "Failed Screenshot");
@@ -140,8 +139,6 @@ public class ExtentReportListener implements ITestListener {
             }
         }
     }
-
-
 
     @Override
     public void onTestSkipped(ITestResult result) {
