@@ -20,8 +20,6 @@ public final class DirectoryUtility {
                 } else {
                     logger.error("Failed to create folder: " + folderPath);
                 }
-            } else {
-                logger.info("Folder already exists: " + folderPath);
             }
         }
     }

@@ -3,12 +3,16 @@ package utils;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
 public class CSVFileUtil {
+
+    private static final Logger logger = LogManager.getLogger(CSVFileUtil.class);
 
     private static void writeContent(String filePath, List<String[]> rows) {
         try (PrintWriter writer = new PrintWriter(new File(filePath))) {
@@ -25,12 +29,14 @@ public class CSVFileUtil {
         try {
             Path path = Paths.get(filePath);
             if (Files.exists(path)) {
-                System.out.println("File already exists: " + filePath);
+                logger.info("File already exists: {}", filePath);
+            } else {
+                Files.createFile(path);
+                logger.info("File created: {}", filePath);
             }
-            Files.createFile(path);
-            System.out.println("File created: " + filePath);
         } catch (IOException e) {
-            System.err.println("Error creating file: " + e.getMessage());
+            logger.error("Error creating file: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create CSV file", e);
         }
     }
 
@@ -39,12 +45,14 @@ public class CSVFileUtil {
         try {
             Path path = Paths.get(filePath);
             if (!Files.exists(path)) {
-                System.out.println("File does not exist: " + filePath);
+                logger.info("File does not exist: {}", filePath);
+            } else {
+                Files.delete(path);
+                logger.info("File deleted: {}", filePath);
             }
-            Files.delete(path);
-            System.out.println("File deleted: " + filePath);
         } catch (IOException e) {
-            System.err.println("Error deleting file: " + e.getMessage());
+            logger.error("Error deleting file: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to delete CSV file", e);
         }
     }
 
@@ -57,12 +65,15 @@ public class CSVFileUtil {
             while ((line = reader.readNext()) != null) {
                 content.add(line);
             }
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + filePath);
+        } catch (NoSuchFileException | FileNotFoundException e) {
+            logger.error("File not found: {}", filePath, e);
+            throw new RuntimeException("CSV file not found: " + filePath, e);
         } catch (IOException e) {
-            System.err.println("Error reading CSV file: " + e.getMessage());
+            logger.error("Error reading CSV file: {}", e.getMessage(), e);
+            throw new RuntimeException("Error reading CSV file: " + filePath, e);
         } catch (CsvValidationException e) {
-            throw new RuntimeException(e);
+            logger.error("CSV validation error while reading file: {}", filePath, e);
+            throw new RuntimeException("CSV validation failed for file: " + filePath, e);
         }
 
         return content;
@@ -71,18 +82,20 @@ public class CSVFileUtil {
     // Write content to CSV file (append mode)
     public static void writeContentToCSV(String filePath, List<String[]> data) {
         if (data == null || data.isEmpty()) {
-            System.err.println("No data provided to write.");
+            logger.warn("No data provided to write to CSV file: {}", filePath);
+            throw new IllegalArgumentException("No data provided to write.");
         }
 
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, true))) {
             writer.writeAll(data);
-            System.out.println("Data written successfully to: " + filePath);
+            logger.info("Data written successfully to: {}", filePath);
         } catch (IOException e) {
-            System.err.println("Error writing to CSV file: " + e.getMessage());
+            logger.error("Error writing to CSV file: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to write to CSV file: " + filePath, e);
         }
     }
 
-    // Read a specific row from the CSV file, starting 0 index
+    // Read a specific row from the CSV file, starting at index 0
     public static String[] readRowFromCSV(String filePath, int rowIndex) {
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
             int currentRow = 0;
@@ -93,10 +106,13 @@ public class CSVFileUtil {
                 }
                 currentRow++;
             }
+            logger.warn("Row index {} out of bounds in file: {}", rowIndex, filePath);
         } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + filePath);
+            logger.error("File not found: {}", filePath, e);
+            throw new RuntimeException("CSV file not found: " + filePath, e);
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error reading CSV file: " + e.getMessage());
+            logger.error("Error reading CSV file: {}", e.getMessage(), e);
+            throw new RuntimeException("Error reading CSV file: " + filePath, e);
         }
         return null;
     }
@@ -104,7 +120,7 @@ public class CSVFileUtil {
     // Read multiple specific rows from the CSV file
     public static List<String[]> readRowsFromCSV(String filePath, List<Integer> rowIndices) {
         List<String[]> result = new ArrayList<>();
-        Set<Integer> rowSet = new HashSet<>(rowIndices); // to avoid duplicates and fast lookup
+        Set<Integer> rowSet = new HashSet<>(rowIndices);
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
             int currentRow = 0;
             String[] line;
@@ -115,9 +131,11 @@ public class CSVFileUtil {
                 currentRow++;
             }
         } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + filePath);
+            logger.error("File not found: {}", filePath, e);
+            throw new RuntimeException("CSV file not found: " + filePath, e);
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error reading CSV file: " + e.getMessage());
+            logger.error("Error reading CSV file: {}", e.getMessage(), e);
+            throw new RuntimeException("Error reading CSV file: " + filePath, e);
         }
         return result;
     }
@@ -128,6 +146,7 @@ public class CSVFileUtil {
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
             String[] header = reader.readNext();
             if (header == null) return columnData;
+
             int columnIndex = -1;
             for (int i = 0; i < header.length; i++) {
                 if (header[i].equalsIgnoreCase(column.trim())) {
@@ -137,8 +156,8 @@ public class CSVFileUtil {
             }
 
             if (columnIndex == -1) {
-                System.err.println("Column not found: " + column);
-                return columnData;
+                logger.error("Column not found: {}", column);
+                throw new IllegalArgumentException("Column not found: " + column);
             }
 
             String[] line;
@@ -150,7 +169,8 @@ public class CSVFileUtil {
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error reading CSV column: " + e.getMessage());
+            logger.error("Error reading CSV column from file {}: {}", filePath, e.getMessage(), e);
+            throw new RuntimeException("Failed to read column from CSV file: " + filePath, e);
         }
         return columnData;
     }
@@ -161,9 +181,11 @@ public class CSVFileUtil {
         for (int i = 0; i < columns.size(); i++) {
             columnsData.add(new ArrayList<>());
         }
+
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
             String[] header = reader.readNext();
             if (header == null) return columnsData;
+
             List<Integer> columnIndexes = new ArrayList<>();
             for (String col : columns) {
                 int idx = -1;
@@ -175,11 +197,14 @@ public class CSVFileUtil {
                 }
                 columnIndexes.add(idx);
             }
+
             for (int i = 0; i < columnIndexes.size(); i++) {
                 if (columnIndexes.get(i) == -1) {
-                    System.err.println("Column not found: " + columns.get(i));
+                    logger.error("Column not found: {}", columns.get(i));
+                    throw new IllegalArgumentException("Column not found: " + columns.get(i));
                 }
             }
+
             String[] line;
             while ((line = reader.readNext()) != null) {
                 for (int i = 0; i < columnIndexes.size(); i++) {
@@ -187,27 +212,24 @@ public class CSVFileUtil {
                     if (colIdx >= 0 && colIdx < line.length) {
                         columnsData.get(i).add(line[colIdx]);
                     } else {
-                        columnsData.get(i).add(""); // Handle missing value
+                        columnsData.get(i).add("");
                     }
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error reading CSV columns: " + e.getMessage());
+            logger.error("Error reading CSV columns from file {}: {}", filePath, e.getMessage(), e);
+            throw new RuntimeException("Failed to read columns from CSV file: " + filePath, e);
         }
+
         return columnsData;
     }
 
-    // Read a specific column from the CSV file by header name, with configurable header row
-    // headerRowNum - 1
+    // Read a specific column from the CSV file by header name with configurable header row
     public static List<String> readColumnFromCSV(String filePath, String column, int headerRow) {
         List<String> columnData = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            // Skip rows before headerRow
             for (int i = 0; i < headerRow; i++) {
-                if (reader.readNext() == null) {
-                    // File ended before header row
-                    return columnData;
-                }
+                if (reader.readNext() == null) return columnData;
             }
 
             String[] header = reader.readNext();
@@ -222,8 +244,8 @@ public class CSVFileUtil {
             }
 
             if (columnIndex == -1) {
-                System.err.println("Column not found: " + column);
-                return columnData;
+                logger.error("Column not found at row {}: {}", headerRow, column);
+                throw new IllegalArgumentException("Column not found: " + column);
             }
 
             String[] line;
@@ -231,28 +253,27 @@ public class CSVFileUtil {
                 if (columnIndex < line.length) {
                     columnData.add(line[columnIndex]);
                 } else {
-                    columnData.add(""); // Handle missing value
+                    columnData.add("");
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error reading CSV column: " + e.getMessage());
+            logger.error("Error reading CSV column from file {} at header row {}: {}", filePath, headerRow, e.getMessage(), e);
+            throw new RuntimeException("Failed to read column from CSV file: " + filePath, e);
         }
+
         return columnData;
     }
 
-    // Read multiple columns from the CSV file by header names, with configurable header row
+    // Read multiple columns from the CSV file by header names with configurable header row
     public static List<List<String>> readColumnsFromCSV(String filePath, List<String> columns, int headerRow) {
         List<List<String>> columnsData = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             columnsData.add(new ArrayList<>());
         }
+
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            // Skip rows before headerRow
             for (int i = 0; i < headerRow; i++) {
-                if (reader.readNext() == null) {
-                    // File ended before header row
-                    return columnsData;
-                }
+                if (reader.readNext() == null) return columnsData;
             }
 
             String[] header = reader.readNext();
@@ -272,7 +293,8 @@ public class CSVFileUtil {
 
             for (int i = 0; i < columnIndexes.size(); i++) {
                 if (columnIndexes.get(i) == -1) {
-                    System.err.println("Column not found: " + columns.get(i));
+                    logger.error("Column not found at row {}: {}", headerRow, columns.get(i));
+                    throw new IllegalArgumentException("Column not found: " + columns.get(i));
                 }
             }
 
@@ -283,58 +305,61 @@ public class CSVFileUtil {
                     if (colIdx >= 0 && colIdx < line.length) {
                         columnsData.get(i).add(line[colIdx]);
                     } else {
-                        columnsData.get(i).add(""); // Handle missing value
+                        columnsData.get(i).add("");
                     }
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error reading CSV columns: " + e.getMessage());
+            logger.error("Error reading CSV columns from file {} at header row {}: {}", filePath, headerRow, e.getMessage(), e);
+            throw new RuntimeException("Failed to read columns from CSV file: " + filePath, e);
         }
+
         return columnsData;
     }
 
-    // Append
+    // Append a single column to an existing CSV file or create a new file
     public static void writeColumnToCSV(String filePath, String column, List<String> data) {
         File file = new File(filePath);
         List<String[]> allRows = readContentFromCSV(filePath);
         List<String> headers = new ArrayList<>();
 
-        if (!file.exists()) {
-            headers.add(column);
-            try (PrintWriter writer = new PrintWriter(file)) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            if (!file.exists() || allRows.isEmpty()) {
+                // File doesn't exist or is empty
+                headers.add(column);
                 writer.println(column);
                 for (String value : data) {
                     writer.println(value);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            try (PrintWriter writer = new PrintWriter(file)) {
-                if (!allRows.isEmpty()) {
-                    headers.addAll(Arrays.asList(allRows.get(0)));
-                    headers.add(column);
-                    writer.println(String.join(",", headers));
+            } else {
+                // File exists and has content
+                headers.addAll(Arrays.asList(allRows.get(0)));
+                headers.add(column);
+                writer.println(String.join(",", headers));
 
-                    for (int i = 0; i < Math.max(data.size(), allRows.size() - 1); i++) {
-                        String[] row = i < allRows.size() - 1 ? allRows.get(i + 1) : new String[headers.size() - 1];
-                        List<String> newRow = new ArrayList<>(Arrays.asList(row));
-                        while (newRow.size() < headers.size() - 1) newRow.add("");
-                        newRow.add(i < data.size() ? data.get(i) : "");
-                        writer.println(String.join(",", newRow));
-                    }
+                for (int i = 0; i < Math.max(data.size(), allRows.size() - 1); i++) {
+                    String[] row = i < allRows.size() - 1 ? allRows.get(i + 1) : new String[headers.size() - 1];
+                    List<String> newRow = new ArrayList<>(Arrays.asList(row));
+                    while (newRow.size() < headers.size() - 1) newRow.add("");
+                    newRow.add(i < data.size() ? data.get(i) : "");
+                    writer.println(String.join(",", newRow));
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            logger.error("Error writing column '{}' to CSV file '{}': {}", column, filePath, e.getMessage(), e);
+            throw new RuntimeException("Failed to write column to CSV: " + filePath, e);
         }
     }
 
-    // Append
+    // Append multiple columns to a new or existing CSV file
     public static void writeColumnsToCSV(String filePath, List<String> columns, List<List<String>> data) {
-        try (PrintWriter writer = new PrintWriter(new File(filePath))) {
+        File file = new File(filePath);
+
+        try (PrintWriter writer = new PrintWriter(file)) {
             writer.println(String.join(",", columns));
-            for (int i = 0; i < data.get(0).size(); i++) {
+            int numRows = data.isEmpty() ? 0 : data.get(0).size();
+
+            for (int i = 0; i < numRows; i++) {
                 List<String> row = new ArrayList<>();
                 for (List<String> columnData : data) {
                     row.add(i < columnData.size() ? columnData.get(i) : "");
@@ -342,187 +367,202 @@ public class CSVFileUtil {
                 writer.println(String.join(",", row));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error writing columns to CSV file '{}': {}", filePath, e.getMessage(), e);
+            throw new RuntimeException("Failed to write columns to CSV: " + filePath, e);
         }
     }
 
+    // Updates a single column in the CSV file, adding the column if it doesn't exist.
     public static void updateColumnToCSV(String filePath, String column, List<String> data) {
-        List<String[]> rows = readContentFromCSV(filePath);
-        if (rows.isEmpty()) return;
+        try {
+            List<String[]> rows = readContentFromCSV(filePath);
+            if (rows.isEmpty()) return;
 
-        String[] headers = rows.get(0);
-        List<String[]> updatedRows = new ArrayList<>();
-        int colIndex = -1;
+            String[] headers = rows.get(0);
+            List<String[]> updatedRows = new ArrayList<>();
+            int colIndex = -1;
 
-        // Determine if column exists
-        for (int i = 0; i < headers.length; i++) {
-            if (headers[i].equals(column)) {
-                colIndex = i;
-                break;
+            for (int i = 0; i < headers.length; i++) {
+                if (headers[i].equals(column)) {
+                    colIndex = i;
+                    break;
+                }
             }
+
+            if (colIndex == -1) {
+                headers = Arrays.copyOf(headers, headers.length + 1);
+                headers[headers.length - 1] = column;
+                colIndex = headers.length - 1;
+            }
+
+            updatedRows.add(headers);
+
+            int maxRows = Math.max(rows.size() - 1, data.size());
+            for (int i = 0; i < maxRows; i++) {
+                String[] baseRow = i + 1 < rows.size() ? rows.get(i + 1) : new String[headers.length];
+                String[] newRow = Arrays.copyOf(baseRow, headers.length);
+                newRow[colIndex] = i < data.size() ? data.get(i) : "";
+                updatedRows.add(newRow);
+            }
+
+            writeContent(filePath, updatedRows);
+        } catch (Exception e) {
+            logger.error("Failed to update single column in CSV", e);
+            throw new RuntimeException("Error updating single column in CSV", e);
         }
-
-        if (colIndex == -1) {
-            // Add new column
-            headers = Arrays.copyOf(headers, headers.length + 1);
-            headers[headers.length - 1] = column;
-            colIndex = headers.length - 1;
-        }
-
-        updatedRows.add(headers);
-
-        int maxRows = Math.max(rows.size() - 1, data.size());
-        for (int i = 0; i < maxRows; i++) {
-            String[] baseRow = i + 1 < rows.size() ? rows.get(i + 1) : new String[headers.length];
-            String[] newRow = Arrays.copyOf(baseRow, headers.length);
-            newRow[colIndex] = i < data.size() ? data.get(i) : "";
-            updatedRows.add(newRow);
-        }
-
-        writeContent(filePath, updatedRows);
     }
 
+    // Updates multiple columns in the CSV file, adding columns if they don't exist.
     public static void updateColumnsToCSV(String filePath, List<String> columns, List<List<String>> data) {
-        List<String[]> rows = readContentFromCSV(filePath);
-        if (rows.isEmpty()) return;
+        try {
+            List<String[]> rows = readContentFromCSV(filePath);
+            if (rows.isEmpty()) return;
 
-        String[] headers = rows.get(0);
-        Map<String, Integer> headerMap = new HashMap<>();
-        for (int i = 0; i < headers.length; i++) {
-            headerMap.put(headers[i], i);
-        }
-
-        // Update header
-        List<String> updatedHeaderList = new ArrayList<>(Arrays.asList(headers));
-        List<Integer> targetIndices = new ArrayList<>();
-
-        for (String col : columns) {
-            if (!headerMap.containsKey(col)) {
-                updatedHeaderList.add(col);
-                targetIndices.add(updatedHeaderList.size() - 1);
-            } else {
-                targetIndices.add(headerMap.get(col));
+            String[] headers = rows.get(0);
+            Map<String, Integer> headerMap = new HashMap<>();
+            for (int i = 0; i < headers.length; i++) {
+                headerMap.put(headers[i], i);
             }
-        }
 
-        int totalCols = updatedHeaderList.size();
-        int maxRows = Math.max(rows.size() - 1, data.get(0).size());
-        List<String[]> updatedRows = new ArrayList<>();
-        updatedRows.add(updatedHeaderList.toArray(new String[0]));
+            List<String> updatedHeaderList = new ArrayList<>(Arrays.asList(headers));
+            List<Integer> targetIndices = new ArrayList<>();
 
-        for (int i = 0; i < maxRows; i++) {
-            String[] baseRow = i + 1 < rows.size() ? rows.get(i + 1) : new String[totalCols];
-            String[] newRow = Arrays.copyOf(baseRow, totalCols);
-            for (int j = 0; j < columns.size(); j++) {
-                int index = targetIndices.get(j);
-                if (index >= newRow.length) {
-                    newRow = Arrays.copyOf(newRow, index + 1);
+            for (String col : columns) {
+                if (!headerMap.containsKey(col)) {
+                    updatedHeaderList.add(col);
+                    targetIndices.add(updatedHeaderList.size() - 1);
+                } else {
+                    targetIndices.add(headerMap.get(col));
                 }
-                newRow[index] = i < data.get(j).size() ? data.get(j).get(i) : "";
             }
-            updatedRows.add(newRow);
-        }
 
-        writeContent(filePath, updatedRows);
+            int totalCols = updatedHeaderList.size();
+            int maxRows = Math.max(rows.size() - 1, data.get(0).size());
+            List<String[]> updatedRows = new ArrayList<>();
+            updatedRows.add(updatedHeaderList.toArray(new String[0]));
+
+            for (int i = 0; i < maxRows; i++) {
+                String[] baseRow = i + 1 < rows.size() ? rows.get(i + 1) : new String[totalCols];
+                String[] newRow = Arrays.copyOf(baseRow, totalCols);
+                for (int j = 0; j < columns.size(); j++) {
+                    int index = targetIndices.get(j);
+                    if (index >= newRow.length) {
+                        newRow = Arrays.copyOf(newRow, index + 1);
+                    }
+                    newRow[index] = i < data.get(j).size() ? data.get(j).get(i) : "";
+                }
+                updatedRows.add(newRow);
+            }
+
+            writeContent(filePath, updatedRows);
+        } catch (Exception e) {
+            logger.error("Failed to update multiple columns in CSV", e);
+            throw new RuntimeException("Error updating multiple columns in CSV", e);
+        }
     }
 
+    // Updates a single column in the CSV file with a specified header row, adding the column if missing.
     public static void updateColumnToCSV(String filePath, String column, List<String> data, int headerRow) {
-        List<String[]> rows = readContentFromCSV(filePath);
-        if (rows.isEmpty() || headerRow >= rows.size()) return;
+        try {
+            List<String[]> rows = readContentFromCSV(filePath);
+            if (rows.isEmpty() || headerRow >= rows.size()) return;
 
-        // Get headers from the specified header row
-        String[] headers = rows.get(headerRow);
-        List<String[]> updatedRows = new ArrayList<>();
+            String[] headers = rows.get(headerRow);
+            List<String[]> updatedRows = new ArrayList<>();
 
-        int colIndex = -1;
-        for (int i = 0; i < headers.length; i++) {
-            if (headers[i].equals(column)) {
-                colIndex = i;
-                break;
-            }
-        }
-
-        if (colIndex == -1) {
-            // Add new column header
-            headers = Arrays.copyOf(headers, headers.length + 1);
-            headers[headers.length - 1] = column;
-            colIndex = headers.length - 1;
-        }
-
-        // Copy all rows before headerRow unchanged
-        for (int i = 0; i < headerRow; i++) {
-            updatedRows.add(rows.get(i));
-        }
-
-        // Add updated header row
-        updatedRows.add(headers);
-
-        int maxRows = Math.max(rows.size() - (headerRow + 1), data.size());
-
-        for (int i = 0; i < maxRows; i++) {
-            int currentRowIndex = i + headerRow + 1;
-            String[] baseRow = currentRowIndex < rows.size() ? rows.get(currentRowIndex) : new String[headers.length];
-            String[] newRow = Arrays.copyOf(baseRow, headers.length);
-
-            newRow[colIndex] = i < data.size() ? data.get(i) : "";
-            updatedRows.add(newRow);
-        }
-
-        writeContent(filePath, updatedRows);
-    }
-
-    public static void updateColumnsToCSV(String filePath, List<String> columns, List<List<String>> data, int headerRow) {
-        List<String[]> rows = readContentFromCSV(filePath);
-        if (rows.isEmpty() || headerRow >= rows.size()) return;
-
-        String[] headers = rows.get(headerRow);
-        Map<String, Integer> headerMap = new HashMap<>();
-        for (int i = 0; i < headers.length; i++) {
-            headerMap.put(headers[i], i);
-        }
-
-        List<String> updatedHeaderList = new ArrayList<>(Arrays.asList(headers));
-        List<Integer> targetIndices = new ArrayList<>();
-
-        for (String col : columns) {
-            if (!headerMap.containsKey(col)) {
-                updatedHeaderList.add(col);
-                targetIndices.add(updatedHeaderList.size() - 1);
-            } else {
-                targetIndices.add(headerMap.get(col));
-            }
-        }
-
-        int totalCols = updatedHeaderList.size();
-        int maxRows = Math.max(rows.size() - (headerRow + 1), data.get(0).size());
-        List<String[]> updatedRows = new ArrayList<>();
-
-        // Add all rows before headerRow unchanged
-        for (int i = 0; i < headerRow; i++) {
-            updatedRows.add(rows.get(i));
-        }
-
-        // Add updated header row
-        updatedRows.add(updatedHeaderList.toArray(new String[0]));
-
-        for (int i = 0; i < maxRows; i++) {
-            int currentRowIndex = i + headerRow + 1;
-            String[] baseRow = currentRowIndex < rows.size() ? rows.get(currentRowIndex) : new String[totalCols];
-            String[] newRow = Arrays.copyOf(baseRow, totalCols);
-
-            for (int j = 0; j < columns.size(); j++) {
-                int index = targetIndices.get(j);
-                if (index >= newRow.length) {
-                    newRow = Arrays.copyOf(newRow, index + 1);
+            int colIndex = -1;
+            for (int i = 0; i < headers.length; i++) {
+                if (headers[i].equals(column)) {
+                    colIndex = i;
+                    break;
                 }
-                newRow[index] = i < data.get(j).size() ? data.get(j).get(i) : "";
             }
-            updatedRows.add(newRow);
-        }
 
-        writeContent(filePath, updatedRows);
+            if (colIndex == -1) {
+                headers = Arrays.copyOf(headers, headers.length + 1);
+                headers[headers.length - 1] = column;
+                colIndex = headers.length - 1;
+            }
+
+            for (int i = 0; i < headerRow; i++) {
+                updatedRows.add(rows.get(i));
+            }
+
+            updatedRows.add(headers);
+
+            int maxRows = Math.max(rows.size() - (headerRow + 1), data.size());
+            for (int i = 0; i < maxRows; i++) {
+                int currentRowIndex = i + headerRow + 1;
+                String[] baseRow = currentRowIndex < rows.size() ? rows.get(currentRowIndex) : new String[headers.length];
+                String[] newRow = Arrays.copyOf(baseRow, headers.length);
+                newRow[colIndex] = i < data.size() ? data.get(i) : "";
+                updatedRows.add(newRow);
+            }
+
+            writeContent(filePath, updatedRows);
+        } catch (Exception e) {
+            logger.error("Failed to update single column in CSV with header row", e);
+            throw new RuntimeException("Error updating single column in CSV with header row", e);
+        }
     }
 
+    // Updates multiple columns in the CSV file with a specified header row, adding columns if missing.
+    public static void updateColumnsToCSV(String filePath, List<String> columns, List<List<String>> data, int headerRow) {
+        try {
+            List<String[]> rows = readContentFromCSV(filePath);
+            if (rows.isEmpty() || headerRow >= rows.size()) return;
+
+            String[] headers = rows.get(headerRow);
+            Map<String, Integer> headerMap = new HashMap<>();
+            for (int i = 0; i < headers.length; i++) {
+                headerMap.put(headers[i], i);
+            }
+
+            List<String> updatedHeaderList = new ArrayList<>(Arrays.asList(headers));
+            List<Integer> targetIndices = new ArrayList<>();
+
+            for (String col : columns) {
+                if (!headerMap.containsKey(col)) {
+                    updatedHeaderList.add(col);
+                    targetIndices.add(updatedHeaderList.size() - 1);
+                } else {
+                    targetIndices.add(headerMap.get(col));
+                }
+            }
+
+            int totalCols = updatedHeaderList.size();
+            int maxRows = Math.max(rows.size() - (headerRow + 1), data.get(0).size());
+            List<String[]> updatedRows = new ArrayList<>();
+
+            for (int i = 0; i < headerRow; i++) {
+                updatedRows.add(rows.get(i));
+            }
+
+            updatedRows.add(updatedHeaderList.toArray(new String[0]));
+
+            for (int i = 0; i < maxRows; i++) {
+                int currentRowIndex = i + headerRow + 1;
+                String[] baseRow = currentRowIndex < rows.size() ? rows.get(currentRowIndex) : new String[totalCols];
+                String[] newRow = Arrays.copyOf(baseRow, totalCols);
+
+                for (int j = 0; j < columns.size(); j++) {
+                    int index = targetIndices.get(j);
+                    if (index >= newRow.length) {
+                        newRow = Arrays.copyOf(newRow, index + 1);
+                    }
+                    newRow[index] = i < data.get(j).size() ? data.get(j).get(i) : "";
+                }
+                updatedRows.add(newRow);
+            }
+
+            writeContent(filePath, updatedRows);
+        } catch (Exception e) {
+            logger.error("Failed to update multiple columns in CSV with header row", e);
+            throw new RuntimeException("Error updating multiple columns in CSV with header row", e);
+        }
+    }
+
+    // Filters rows from CSV where a single column matches the given value.
     public static List<String[]> filterRowsFromCSV(String filePath, String columnName, String columnValue) {
         List<String[]> filteredRows = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
@@ -538,7 +578,7 @@ public class CSVFileUtil {
             }
 
             if (colIndex == -1) {
-                System.err.println("Column not found: " + columnName);
+                logger.error("Column not found: {}", columnName);
                 return filteredRows;
             }
 
@@ -549,15 +589,17 @@ public class CSVFileUtil {
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error filtering CSV rows: " + e.getMessage());
+            logger.error("Error filtering CSV rows for single column", e);
+            throw new RuntimeException("Error filtering CSV rows for single column", e);
         }
         return filteredRows;
     }
 
+    // Filters rows from CSV where multiple columns match given values.
     public static List<String[]> filterRowsFromCSV(String filePath, List<String> columnsName, List<String> columnsValue) {
         List<String[]> filteredRows = new ArrayList<>();
         if (columnsName == null || columnsValue == null || columnsName.size() != columnsValue.size()) {
-            System.err.println("Column names and values must be non-null and have the same size.");
+            logger.error("Column names and values must be non-null and have the same size.");
             return filteredRows;
         }
 
@@ -570,10 +612,9 @@ public class CSVFileUtil {
                 colIndexMap.put(header[i].trim(), i);
             }
 
-            // Validate all column names exist
             for (String colName : columnsName) {
                 if (!colIndexMap.containsKey(colName.trim())) {
-                    System.err.println("Column not found: " + colName);
+                    logger.error("Column not found: {}", colName);
                     return filteredRows;
                 }
             }
@@ -595,14 +636,15 @@ public class CSVFileUtil {
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error filtering CSV rows: " + e.getMessage());
+            logger.error("Error filtering CSV rows for multiple columns", e);
+            throw new RuntimeException("Error filtering CSV rows for multiple columns", e);
         }
         return filteredRows;
     }
 
+    // Filters rows by one column and returns specified columns from matching rows.
     public static List<List<String>> filterRowsFromCSV(String filePath, String columnName, String columnValue, List<String> columnsToIncludeInRow) {
         List<List<String>> result = new ArrayList<>();
-
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
             String[] header = reader.readNext();
             if (header == null) return result;
@@ -613,7 +655,7 @@ public class CSVFileUtil {
             }
 
             if (!headerMap.containsKey(columnName)) {
-                System.err.println("Filter column not found: " + columnName);
+                logger.error("Filter column not found: {}", columnName);
                 return result;
             }
 
@@ -622,13 +664,12 @@ public class CSVFileUtil {
                 if (headerMap.containsKey(col)) {
                     includedIndices.add(headerMap.get(col));
                 } else {
-                    System.err.println("Included column not found: " + col);
+                    logger.warn("Included column not found: {}", col);
                     includedIndices.add(-1);
                 }
             }
 
             int filterIndex = headerMap.get(columnName);
-
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (filterIndex < line.length && columnValue.equalsIgnoreCase(line[filterIndex].trim())) {
@@ -640,17 +681,17 @@ public class CSVFileUtil {
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error filtering rows from CSV: " + e.getMessage());
+            logger.error("Error filtering rows from CSV by single column", e);
+            throw new RuntimeException("Error filtering rows from CSV by single column", e);
         }
-
         return result;
     }
 
+    // Filters rows by multiple columns and returns specified columns from matching rows.
     public static List<List<String>> filterRowsFromCSV(String filePath, List<String> columnNames, List<String> columnValues, List<String> columnsToIncludeInRow) {
         List<List<String>> result = new ArrayList<>();
-
         if (columnNames == null || columnValues == null || columnNames.size() != columnValues.size()) {
-            System.err.println("Filter column names and values must be non-null and the same size.");
+            logger.error("Filter column names and values must be non-null and the same size.");
             return result;
         }
 
@@ -668,7 +709,7 @@ public class CSVFileUtil {
                 if (headerMap.containsKey(col)) {
                     filterIndices.add(headerMap.get(col));
                 } else {
-                    System.err.println("Filter column not found: " + col);
+                    logger.error("Filter column not found: {}", col);
                     return result;
                 }
             }
@@ -678,7 +719,7 @@ public class CSVFileUtil {
                 if (headerMap.containsKey(col)) {
                     includedIndices.add(headerMap.get(col));
                 } else {
-                    System.err.println("Included column not found: " + col);
+                    logger.warn("Included column not found: {}", col);
                     includedIndices.add(-1);
                 }
             }
@@ -694,7 +735,6 @@ public class CSVFileUtil {
                         break;
                     }
                 }
-
                 if (matches) {
                     List<String> row = new ArrayList<>();
                     for (int idx : includedIndices) {
@@ -704,12 +744,13 @@ public class CSVFileUtil {
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error filtering rows from CSV: " + e.getMessage());
+            logger.error("Error filtering rows from CSV by multiple columns", e);
+            throw new RuntimeException("Error filtering rows from CSV by multiple columns", e);
         }
-
         return result;
     }
 
+    // Filters a single column from CSV rows where columnName matches columnValue.
     public static List<String> filterColumnFromCSV(String filePath, String columnName, String columnValue) {
         List<String> result = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
@@ -722,12 +763,11 @@ public class CSVFileUtil {
             }
 
             if (!colMap.containsKey(columnName)) {
-                System.err.println("Column not found: " + columnName);
+                logger.error("Column not found: {}", columnName);
                 return result;
             }
 
             int matchIndex = colMap.get(columnName);
-
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (matchIndex < line.length && columnValue.equalsIgnoreCase(line[matchIndex].trim())) {
@@ -735,11 +775,13 @@ public class CSVFileUtil {
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error filtering CSV column: " + e.getMessage());
+            logger.error("Error filtering CSV column", e);
+            throw new RuntimeException("Error filtering CSV column", e);
         }
         return result;
     }
 
+    // Filters multiple columns from CSV where columnsName match columnsValue and returns matching column data lists.
     public static List<List<String>> filterColumnsFromCSV(String filePath, List<String> columnsName, List<String> columnsValue) {
         List<List<String>> result = new ArrayList<>();
         for (int i = 0; i < columnsName.size(); i++) {
@@ -747,7 +789,7 @@ public class CSVFileUtil {
         }
 
         if (columnsName == null || columnsValue == null || columnsName.size() != columnsValue.size()) {
-            System.err.println("Column names and values must be non-null and have the same size.");
+            logger.error("Column names and values must be non-null and have the same size.");
             return result;
         }
 
@@ -762,7 +804,7 @@ public class CSVFileUtil {
 
             for (String col : columnsName) {
                 if (!colMap.containsKey(col.trim())) {
-                    System.err.println("Column not found: " + col);
+                    logger.error("Column not found: {}", col);
                     return result;
                 }
             }
@@ -779,7 +821,6 @@ public class CSVFileUtil {
                         break;
                     }
                 }
-
                 if (match) {
                     for (int i = 0; i < columnsName.size(); i++) {
                         int index = colMap.get(columnsName.get(i).trim());
@@ -788,9 +829,9 @@ public class CSVFileUtil {
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            System.err.println("Error filtering CSV columns: " + e.getMessage());
+            logger.error("Error filtering CSV columns", e);
+            throw new RuntimeException("Error filtering CSV columns", e);
         }
-
         return result;
     }
 }

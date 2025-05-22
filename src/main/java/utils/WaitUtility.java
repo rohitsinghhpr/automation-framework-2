@@ -22,11 +22,19 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.visibilityOf(element));
             logger.info("Element '{}' is visible.", elementName);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for visibility of element '{}': {}", elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for visibility of element '{}': {}", elementName, e.getMessage());
+            logger.error("Error waiting for visibility of element '{}': {}", elementName, e.getMessage());
+            throw e;
+        }
+    }
+
+    public static void waitForVisibility(WebDriver driver, By locator, int timeoutSeconds, String elementName) {
+        logger.info("Waiting for visibility of element: {}", elementName);
+        try {
+            getWait(driver, timeoutSeconds).until(ExpectedConditions.visibilityOfElementLocated(locator));
+            logger.info("Element '{}' is visible.", elementName);
+        } catch (Exception e) {
+            logger.error("Error waiting for visibility of element '{}': {}", elementName, e.getMessage());
             throw e;
         }
     }
@@ -36,11 +44,19 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.elementToBeClickable(element));
             logger.info("Element '{}' is clickable.", elementName);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for clickability of element '{}': {}", elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for clickability of element '{}': {}", elementName, e.getMessage());
+            logger.error("Error waiting for clickability of element '{}': {}", elementName, e.getMessage());
+            throw e;
+        }
+    }
+
+    public static void waitForClickability(WebDriver driver, By locator, int timeoutSeconds, String elementName) {
+        logger.info("Waiting for element to be clickable: {}", elementName);
+        try {
+            getWait(driver, timeoutSeconds).until(ExpectedConditions.elementToBeClickable(locator));
+            logger.info("Element '{}' is clickable.", elementName);
+        } catch (Exception e) {
+            logger.error("Error waiting for clickability of element '{}': {}", elementName, e.getMessage());
             throw e;
         }
     }
@@ -50,11 +66,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.presenceOfElementLocated(locator));
             logger.info("Element '{}' is present.", elementName);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for presence of element '{}': {}", elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for presence of element '{}': {}", elementName, e.getMessage());
+            logger.error("Error waiting for presence of element '{}': {}", elementName, e.getMessage());
             throw e;
         }
     }
@@ -64,11 +77,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.invisibilityOf(element));
             logger.info("Element '{}' is invisible.", elementName);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for invisibility of element '{}': {}", elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for invisibility of element '{}': {}", elementName, e.getMessage());
+            logger.error("Error waiting for invisibility of element '{}': {}", elementName, e.getMessage());
             throw e;
         }
     }
@@ -78,11 +88,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.textToBePresentInElement(element, text));
             logger.info("Text '{}' is present in element '{}'.", text, elementName);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for text '{}' in element '{}': {}", text, elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for text '{}' in element '{}': {}", text, elementName, e.getMessage());
+            logger.error("Error waiting for text '{}' in element '{}': {}", text, elementName, e.getMessage());
             throw e;
         }
     }
@@ -92,11 +99,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(driver1 -> !element.getText().contains(text));
             logger.info("Text '{}' is absent in element '{}'.", text, elementName);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for absence of text '{}' in element '{}': {}", text, elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for absence of text '{}' in element '{}': {}", text, elementName, e.getMessage());
+            logger.error("Error waiting for absence of text '{}' in element '{}': {}", text, elementName, e.getMessage());
             throw e;
         }
     }
@@ -106,11 +110,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.attributeToBe(element, attribute, value));
             logger.info("Element '{}' attribute '{}' is '{}'.", elementName, attribute, value);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for attribute '{}' to be '{}' in element '{}': {}", attribute, value, elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for attribute '{}' to be '{}' in element '{}': {}", attribute, value, elementName, e.getMessage());
+            logger.error("Error waiting for attribute '{}' to be '{}' in element '{}': {}", attribute, value, elementName, e.getMessage());
             throw e;
         }
     }
@@ -120,11 +121,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.attributeContains(element, attribute, value));
             logger.info("Element '{}' attribute '{}' contains '{}'.", elementName, attribute, value);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for attribute '{}' to contain '{}' in element '{}': {}", attribute, value, elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for attribute '{}' to contain '{}' in element '{}': {}", attribute, value, elementName, e.getMessage());
+            logger.error("Error waiting for attribute '{}' to contain '{}' in element '{}': {}", attribute, value, elementName, e.getMessage());
             throw e;
         }
     }
@@ -134,11 +132,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frameLocator));
             logger.info("Switched to frame '{}'.", frameName);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for frame '{}': {}", frameName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for frame '{}': {}", frameName, e.getMessage());
+            logger.error("Error waiting for frame '{}': {}", frameName, e.getMessage());
             throw e;
         }
     }
@@ -148,11 +143,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.numberOfElementsToBe(locator, number));
             logger.info("Number of elements '{}' is {}", elementName, number);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for number of elements '{}' to be {}: {}", elementName, number, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for number of elements '{}' to be {}: {}", elementName, number, e.getMessage());
+            logger.error("Error waiting for number of elements '{}' to be {}: {}", elementName, number, e.getMessage());
             throw e;
         }
     }
@@ -162,11 +154,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.numberOfElementsToBeMoreThan(locator, number));
             logger.info("Number of elements '{}' is more than {}", elementName, number);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for number of elements '{}' to be more than {}: {}", elementName, number, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for number of elements '{}' to be more than {}: {}", elementName, number, e.getMessage());
+            logger.error("Error waiting for number of elements '{}' to be more than {}: {}", elementName, number, e.getMessage());
             throw e;
         }
     }
@@ -176,11 +165,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.numberOfElementsToBeLessThan(locator, number));
             logger.info("Number of elements '{}' is less than {}", elementName, number);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for number of elements '{}' to be less than {}: {}", elementName, number, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for number of elements '{}' to be less than {}: {}", elementName, number, e.getMessage());
+            logger.error("Error waiting for number of elements '{}' to be less than {}: {}", elementName, number, e.getMessage());
             throw e;
         }
     }
@@ -190,11 +176,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.urlToBe(url));
             logger.info("URL is '{}'", url);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for URL to be '{}': {}", url, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for URL to be '{}': {}", url, e.getMessage());
+            logger.error("Error waiting for URL to be '{}': {}", url, e.getMessage());
             throw e;
         }
     }
@@ -204,11 +187,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.urlContains(fraction));
             logger.info("URL contains '{}'", fraction);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for URL to contain '{}': {}", fraction, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for URL to contain '{}': {}", fraction, e.getMessage());
+            logger.error("Error waiting for URL to contain '{}': {}", fraction, e.getMessage());
             throw e;
         }
     }
@@ -218,11 +198,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.titleIs(title));
             logger.info("Page title is '{}'", title);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for page title to be '{}': {}", title, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for page title to be '{}': {}", title, e.getMessage());
+            logger.error("Error waiting for page title to be '{}': {}", title, e.getMessage());
             throw e;
         }
     }
@@ -232,11 +209,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.titleContains(titleFragment));
             logger.info("Page title contains '{}'", titleFragment);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for page title to contain '{}': {}", titleFragment, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for page title to contain '{}': {}", titleFragment, e.getMessage());
+            logger.error("Error waiting for page title to contain '{}': {}", titleFragment, e.getMessage());
             throw e;
         }
     }
@@ -246,11 +220,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.alertIsPresent());
             logger.info("Alert is present");
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for alert presence: {}", e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for alert presence: {}", e.getMessage());
+            logger.error("Error waiting for alert presence: {}", e.getMessage());
             throw e;
         }
     }
@@ -260,11 +231,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.elementToBeSelected(element));
             logger.info("Element '{}' is selected", elementName);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for element '{}' to be selected: {}", elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for element '{}' to be selected: {}", elementName, e.getMessage());
+            logger.error("Error waiting for element '{}' to be selected: {}", elementName, e.getMessage());
             throw e;
         }
     }
@@ -274,11 +242,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.elementSelectionStateToBe(element, false));
             logger.info("Element '{}' is deselected", elementName);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for element '{}' to be deselected: {}", elementName, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for element '{}' to be deselected: {}", elementName, e.getMessage());
+            logger.error("Error waiting for element '{}' to be deselected: {}", elementName, e.getMessage());
             throw e;
         }
     }
@@ -288,11 +253,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(ExpectedConditions.numberOfWindowsToBe(expectedNumberOfWindows));
             logger.info("Number of windows is {}", expectedNumberOfWindows);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for number of windows to be {}: {}", expectedNumberOfWindows, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for number of windows to be {}: {}", expectedNumberOfWindows, e.getMessage());
+            logger.error("Error waiting for number of windows to be {}: {}", expectedNumberOfWindows, e.getMessage());
             throw e;
         }
     }
@@ -302,7 +264,6 @@ public final class WaitUtility implements IWaitUtility {
         try {
             WebDriverWait wait = getWait(driver, timeoutSeconds);
 
-            // Try switch by handle first
             boolean switched = false;
             try {
                 wait.until(driver1 -> {
@@ -314,8 +275,7 @@ public final class WaitUtility implements IWaitUtility {
                     return false;
                 });
                 switched = true;
-            } catch (TimeoutException ignored) {
-                // Try switch by title fallback below
+            } catch (Exception ignored) {
             }
 
             if (!switched) {
@@ -331,11 +291,8 @@ public final class WaitUtility implements IWaitUtility {
             }
 
             logger.info("Switched to window '{}'", windowHandleOrTitle);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for window '{}': {}", windowHandleOrTitle, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for window '{}': {}", windowHandleOrTitle, e.getMessage());
+            logger.error("Error waiting for window '{}': {}", windowHandleOrTitle, e.getMessage());
             throw e;
         }
     }
@@ -345,11 +302,8 @@ public final class WaitUtility implements IWaitUtility {
         try {
             getWait(driver, timeoutSeconds).until(driver1 -> !driver1.getWindowHandles().contains(windowHandle));
             logger.info("Window '{}' is closed", windowHandle);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for window '{}' to close: {}", windowHandle, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error waiting for window '{}' to close: {}", windowHandle, e.getMessage());
+            logger.error("Error waiting for window '{}' to close: {}", windowHandle, e.getMessage());
             throw e;
         }
     }

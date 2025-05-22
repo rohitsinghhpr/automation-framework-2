@@ -5,6 +5,7 @@ import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.MediaEntityBuilder;
 import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+import com.aventstack.extentreports.reporter.configuration.Theme;
 import org.openqa.selenium.WebElement;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
@@ -18,9 +19,9 @@ import java.util.Date;
 public class ExtentReportListener implements ITestListener {
 
     public void configureReport() {
+        String configFileName = System.getProperty("user.dir")+"/config/config.properties";
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-        String reportName = "TestReport_" + timeStamp + ".html";
-
+        String reportFileName = "TestReport_" + timeStamp + ".html";
         String reportsDirPath = System.getProperty("user.dir") + "/reports";
 
         File reportsDir = new File(reportsDirPath);
@@ -28,15 +29,25 @@ public class ExtentReportListener implements ITestListener {
             reportsDir.mkdirs();
         }
 
-        ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportsDirPath + "/" + reportName);
-        sparkReporter.config().setDocumentTitle("Automation Report");
-        sparkReporter.config().setReportName("Functional Test Report");
+        ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportsDirPath + "/" + reportFileName);
+        sparkReporter.config().setDocumentTitle(PropertyReader.getProperty(configFileName,"REPORT_TITLE"));
+        sparkReporter.config().setReportName(PropertyReader.getProperty(configFileName,"REPORT_NAME"));
+
+        if ("DARK".equalsIgnoreCase(PropertyReader.getProperty(configFileName,"REPORT_THEME"))) {
+            sparkReporter.config().setTheme(Theme.DARK);
+        } else if ("STANDARD".equalsIgnoreCase(PropertyReader.getProperty(configFileName,"REPORT_THEME"))) {
+            sparkReporter.config().setTheme(Theme.STANDARD);
+        } else {
+            // Default theme if nothing is configured
+            sparkReporter.config().setTheme(Theme.STANDARD);
+        }
+
 
         extent = new ExtentReports();
         extent.attachReporter(sparkReporter);
-        extent.setSystemInfo("Host Name", "Localhost");
-        extent.setSystemInfo("Environment", "QA");
-        extent.setSystemInfo("User", "Test Engineer");
+        extent.setSystemInfo("Host Name", PropertyReader.getProperty(configFileName,"HOST_NAME"));
+        extent.setSystemInfo("Environment", PropertyReader.getProperty(configFileName,"ENVIRONMENT"));
+        extent.setSystemInfo("User", PropertyReader.getProperty(configFileName,"USER"));
     }
 
     private static ExtentReports extent;
@@ -48,8 +59,17 @@ public class ExtentReportListener implements ITestListener {
 
     public static void logPassWithScreenshot(String stepName) {
         try {
-            String screenshotPath = ScreenshotUtility.takeScreenshot(DriverManager.getDriver(), "passed", stepName);
-            getExtentTest().pass(stepName, MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+            String screenshotFormat = PropertyReader.getProperty(System.getProperty("user.dir")+"/config/config.properties","SCREENSHOT_FORMAT");
+            if ("base64".equalsIgnoreCase(screenshotFormat)) {
+                String base64Screenshot = ScreenshotUtility.takeScreenshotAsBase64(DriverManager.getDriver());
+                getExtentTest().pass(stepName, MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
+            } else if ("png".equalsIgnoreCase(screenshotFormat)) {
+                String screenshotPath = ScreenshotUtility.takeScreenshot(DriverManager.getDriver(), "passed", stepName);
+                getExtentTest().pass(stepName, MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+            } else {
+                getExtentTest().pass(stepName);
+                getExtentTest().log(Status.WARNING, "Invalid screenshot format in config: " + screenshotFormat);
+            }
         } catch (Exception e) {
             getExtentTest().pass(stepName);
             e.printStackTrace();
@@ -59,8 +79,17 @@ public class ExtentReportListener implements ITestListener {
 
     public static void logPassWithElementScreenshot(String stepName, WebElement element) {
         try {
-            String screenshotPath = ScreenshotUtility.takeElementScreenshot(element, "passed", stepName);
-            getExtentTest().pass(stepName, MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+            String screenshotFormat = PropertyReader.getProperty(System.getProperty("user.dir")+"/config/config.properties","SCREENSHOT_FORMAT");
+            if ("base64".equalsIgnoreCase(screenshotFormat)) {
+                String base64Screenshot = ScreenshotUtility.takeElementScreenshotAsBase64(element);
+                getExtentTest().pass(stepName, MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
+            } else if ("png".equalsIgnoreCase(screenshotFormat)) {
+                String screenshotPath = ScreenshotUtility.takeElementScreenshot(element, "passed", stepName);
+                getExtentTest().pass(stepName, MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+            } else {
+                getExtentTest().pass(stepName);
+                getExtentTest().log(Status.WARNING, "Invalid screenshot format in config: " + screenshotFormat);
+            }
         } catch (Exception e) {
             getExtentTest().pass(stepName);
             e.printStackTrace();
@@ -91,17 +120,27 @@ public class ExtentReportListener implements ITestListener {
         test.get().log(Status.FAIL, result.getThrowable());
         if (DriverManager.getDriver() != null) {
             try {
-                String screenshotPath = ScreenshotUtility.takeScreenshot(
-                        DriverManager.getDriver(), "failed", result.getMethod().getMethodName()
-                );
-                test.get().addScreenCaptureFromPath(screenshotPath);
+                String screenshotFormat = PropertyReader.getProperty(System.getProperty("user.dir")+"/config/config.properties","SCREENSHOT_FORMAT");
+                if ("base64".equalsIgnoreCase(screenshotFormat)) {
+                    String base64Screenshot = ScreenshotUtility.takeScreenshotAsBase64(DriverManager.getDriver());
+                    test.get().addScreenCaptureFromBase64String(base64Screenshot, "Failed Screenshot");
+
+                } else if ("png".equalsIgnoreCase(screenshotFormat)) {
+                    String screenshotPath = ScreenshotUtility.takeScreenshot(
+                            DriverManager.getDriver(), "failed", result.getMethod().getMethodName()
+                    );
+                    test.get().addScreenCaptureFromPath(screenshotPath);
+
+                } else {
+                    test.get().log(Status.WARNING, "Invalid screenshot format in config: " + screenshotFormat);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 test.get().log(Status.WARNING, "Could not capture screenshot: " + e.getMessage());
             }
         }
-
     }
+
 
 
     @Override
